@@ -1,11 +1,12 @@
-// Licensed under the Dartastic Pro Software License Agreement.
+// Licensed under the Apache License, Version 2.0
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_render_suppression.dart';
 
 class RenderResult {
+  /// Creates a result.
   const RenderResult({
     this.ownerId,
     this.serviceId,
@@ -59,8 +60,13 @@ class RenderResult {
   final String? errorMessage;
 }
 
+/// What a traced call returned: the value for the caller plus fields
+/// recorded on the span.
 class RenderCallResult<T> {
+  /// Creates a call result.
   const RenderCallResult({required this.value, this.result});
+
+  /// The value returned to the caller.
   final T value;
   final RenderResult? result;
 }
@@ -68,118 +74,124 @@ class RenderCallResult<T> {
 Future<T> tracedRender<T>({
   required String operation,
   required Future<RenderCallResult<T>> Function() invoke,
-  Tracer? tracer,
+  APITracer? tracer,
 }) async {
   if (renderInstrumentationSuppressed()) {
     final r = await invoke();
     return r.value;
   }
-  final t = tracer ?? OTel.tracerProvider().getTracer('otel_render');
+  final t = tracer ?? OTelAPI.tracerProvider().getTracer('otel_render');
   final span = t.startSpan('render $operation', kind: SpanKind.client);
   try {
     span.addAttributes(
-        OTel.attributes([OTel.attributeString('rpc.system', 'render')]));
+        OTelAPI.attributes([OTelAPI.attributeString('rpc.system', 'render')]));
     span.addAttributes(
-        OTel.attributes([OTel.attributeString('rpc.method', operation)]));
+        OTelAPI.attributes([OTelAPI.attributeString('rpc.method', operation)]));
     final r = await invoke();
     final res = r.result;
     if (res != null) {
       if (res.ownerId != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('render.owner.id', res.ownerId!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('render.owner.id', res.ownerId!)]));
       }
       if (res.serviceId != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('render.service.id', res.serviceId!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('render.service.id', res.serviceId!)]));
       }
       if (res.serviceName != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('render.service.name', res.serviceName!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('render.service.name', res.serviceName!)
+        ]));
       }
       if (res.serviceType != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('render.service.type', res.serviceType!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('render.service.type', res.serviceType!)
+        ]));
       }
       if (res.serviceStatus != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('render.service.status', res.serviceStatus!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('render.service.status', res.serviceStatus!)
         ]));
       }
       if (res.region != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('render.region', res.region!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('render.region', res.region!)]));
       }
       if (res.runtime != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('render.runtime', res.runtime!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('render.runtime', res.runtime!)]));
       }
       if (res.plan != null) {
-        span.addAttributes(
-            OTel.attributes([OTel.attributeString('render.plan', res.plan!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('render.plan', res.plan!)]));
       }
       if (res.autoscaling != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('render.autoscaling', res.autoscaling!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('render.autoscaling', res.autoscaling!)]));
       }
       if (res.instances != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeInt('render.instances', res.instances!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeInt('render.instances', res.instances!)]));
       }
       if (res.deployId != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('render.deploy.id', res.deployId!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('render.deploy.id', res.deployId!)]));
       }
       if (res.deployStatus != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('render.deploy.status', res.deployStatus!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('render.deploy.status', res.deployStatus!)
+        ]));
       }
       if (res.deployTrigger != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('render.deploy.trigger', res.deployTrigger!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('render.deploy.trigger', res.deployTrigger!)
         ]));
       }
       if (res.gitProvider != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('render.git.provider', res.gitProvider!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('render.git.provider', res.gitProvider!)
+        ]));
       }
       if (res.gitBranch != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('render.git.branch', res.gitBranch!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('render.git.branch', res.gitBranch!)]));
       }
       if (res.gitCommit != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('render.git.commit', res.gitCommit!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('render.git.commit', res.gitCommit!)]));
       }
       if (res.buildDurationMs != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeInt('render.build.duration_ms', res.buildDurationMs!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeInt('render.build.duration_ms', res.buildDurationMs!)
         ]));
       }
       if (res.databaseEngine != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('render.database.engine', res.databaseEngine!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('render.database.engine', res.databaseEngine!)
         ]));
       }
       if (res.databasePlan != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('render.database.plan', res.databasePlan!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('render.database.plan', res.databasePlan!)
+        ]));
       }
       if (res.databaseStatus != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('render.database.status', res.databaseStatus!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('render.database.status', res.databaseStatus!)
         ]));
       }
       if (res.diskSizeGb != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeInt('render.disk.size_gb', res.diskSizeGb!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeInt('render.disk.size_gb', res.diskSizeGb!)]));
       }
       if (res.statusCode != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeInt('http.response.status_code', res.statusCode!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeInt('http.response.status_code', res.statusCode!)
+        ]));
       }
       if (res.errorCode != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('render.error.code', res.errorCode!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('render.error.code', res.errorCode!)]));
       }
       final fail = res.errorCode != null ||
           (res.statusCode != null && res.statusCode! >= 400) ||
@@ -188,9 +200,9 @@ Future<T> tracedRender<T>({
           res.deployStatus == 'canceled' ||
           res.deployStatus == 'deactivated';
       if (fail) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString(
-              ErrorResource.errorType.key, res.errorCode ?? 'render.error')
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
+              ErrorAttributes.errorType.key, res.errorCode ?? 'render.error')
         ]));
         span.setStatus(SpanStatusCode.Error, res.errorMessage);
       }
